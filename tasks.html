@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Tasks <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addTaskModal">+ Add</button></h1>
+<table class="table mt-3">
+    <thead><tr><th>Title</th><th>Asset</th><th>Assignee</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for t in tasks %}
+    <tr>
+        <td>{{ t.title }}</td>
+        <td>{{ t.asset.name }}</td>
+        <td>{{ t.assigned_to }}</td>
+        <td>{{ t.due_date.date() if t.due_date else 'N/A' }}</td>
+        <td>{{ t.status }}</td>
+        <td>
+            <select onchange="updateTaskStatus({{ t.id }}, this.value)" class="form-select form-select-sm">
+                <option {% if t.status=='pending' %}selected{% endif %}>pending</option>
+                <option {% if t.status=='in_progress' %}selected{% endif %}>in_progress</option>
+                <option {% if t.status=='done' %}selected{% endif %}>done</option>
+            </select>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="modal fade" id="addTaskModal">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5>Create Task</h5></div>
+        <div class="modal-body">
+            <select class="form-select mb-2" id="taskAssetId">
+                {% for a in assets %}<option value="{{ a.id }}">{{ a.name }}</option>{% endfor %}
+            </select>
+            <input class="form-control mb-2" id="taskTitle" placeholder="Title">
+            <input class="form-control mb-2" id="taskAssigned" placeholder="Assignee">
+            <input class="form-control mb-2" id="taskDue" type="date">
+            <textarea class="form-control" id="taskDesc" placeholder="Description"></textarea>
+        </div>
+        <div class="modal-footer"><button class="btn btn-primary" onclick="addTask()">Save</button></div>
+    </div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function addTask() {
+    const data = {
+        asset_id: parseInt(document.getElementById('taskAssetId').value),
+        title: document.getElementById('taskTitle').value,
+        assigned_to: document.getElementById('taskAssigned').value,
+        due_date: document.getElementById('taskDue').value,
+        description: document.getElementById('taskDesc').value
+    };
+    await fetch('/api/tasks', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+    location.reload();
+}
+async function updateTaskStatus(id, status) {
+    await fetch('/api/tasks/'+id, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status})});
+}
+</script>
+{% endblock %}
