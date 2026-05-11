@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Text
 from sqlalchemy.orm import Session, sessionmaker, relationship, declarative_base
 
+
 # ---------- Database ----------
 DATABASE_URL = "sqlite:///./easm.db"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
