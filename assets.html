@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Assets <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAssetModal">+ Add</button></h1>
+<table class="table table-hover mt-3">
+    <thead><tr><th>Name</th><th>Type</th><th>Risk Score</th><th>Status</th><th>Tags</th><th>Actions</th></tr></thead>
+    <tbody id="assetTable">
+    {% for a in assets %}
+    <tr id="row-{{ a.id }}">
+        <td>{{ a.name }}</td>
+        <td>{{ a.type }}</td>
+        <td>{{ a.risk_score }}</td>
+        <td>{{ a.status }}</td>
+        <td>{{ a.tags }}</td>
+        <td>
+            <button class="btn btn-sm btn-danger" onclick="deleteAsset({{ a.id }})">Delete</button>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="modal fade" id="addAssetModal" tabindex="-1">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5>Add Asset</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <input class="form-control mb-2" id="assetName" placeholder="Name (e.g. example.com)">
+            <input class="form-control mb-2" id="assetValue" placeholder="Value (domain or IP)">
+            <select class="form-select mb-2" id="assetType"><option>domain</option><option>ip</option><option>subdomain</option><option>service</option></select>
+            <input class="form-control mb-2" id="assetTags" placeholder="Tags (comma separated)">
+            <textarea class="form-control" id="assetNotes" placeholder="Notes"></textarea>
+        </div>
+        <div class="modal-footer"><button class="btn btn-primary" onclick="addAsset()">Save</button></div>
+    </div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function addAsset() {
+    const data = {
+        name: document.getElementById('assetName').value,
+        value: document.getElementById('assetValue').value,
+        type: document.getElementById('assetType').value,
+        tags: document.getElementById('assetTags').value,
+        notes: document.getElementById('assetNotes').value,
+    };
+    const res = await fetch('/api/assets', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+    if(res.ok) location.reload(); else alert("Failed");
+}
+async function deleteAsset(id) {
+    if(!confirm("Delete?")) return;
+    await fetch('/api/assets/'+id, {method:'DELETE'});
+    location.reload();
+}
+</script>
+{% endblock %}
