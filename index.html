@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body"><h5 class="card-title">Total Assets</h5><p class="card-text fs-3">{{ total_assets }}</p></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-body"><h5 class="card-title">Total Vulns</h5><p class="card-text fs-3">{{ total_vulns }}</p></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body"><h5 class="card-title">Open Vulns</h5><p class="card-text fs-3">{{ open_vulns }}</p></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body"><h5 class="card-title">Pending Tasks</h5><p class="card-text fs-3">{{ pending_tasks }}</p></div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <h4>Vulnerability Severity</h4>
+        <canvas id="severityChart" width="400" height="200"></canvas>
+    </div>
+    <div class="col-md-6">
+        <h4>Top 5 Risky Assets</h4>
+        <table class="table table-striped">
+            <thead><tr><th>Asset</th><th>Risk Score</th></tr></thead>
+            <tbody>
+                {% for asset in top_risk_assets %}
+                <tr><td>{{ asset.name }}</td><td>{{ asset.risk_score }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const ctx = document.getElementById('severityChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Critical', 'High', 'Medium', 'Low'],
+        datasets: [{
+            label: 'Count',
+            data: [{{ risk_levels.critical }}, {{ risk_levels.high }}, {{ risk_levels.medium }}, {{ risk_levels.low }}],
+            backgroundColor: ['#dc3545','#fd7e14','#ffc107','#28a745']
+        }]
+    }
+});
+</script>
+{% endblock %}
