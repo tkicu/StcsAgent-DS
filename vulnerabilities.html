@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Vulnerabilities <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addVulnModal">+ Add</button></h1>
+<table class="table mt-3">
+    <thead><tr><th>Title</th><th>Severity</th><th>Asset</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for v in vulnerabilities %}
+    <tr>
+        <td>{{ v.title }}</td>
+        <td><span class="badge bg-{{ 'danger' if v.severity=='critical' else 'warning' if v.severity=='high' else 'info' }}">{{ v.severity }}</span></td>
+        <td>{{ v.asset.name }}</td>
+        <td>{{ v.status }}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="deleteVuln({{ v.id }})">Delete</button></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="modal fade" id="addVulnModal">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5>Add Vulnerability</h5></div>
+        <div class="modal-body">
+            <select class="form-select mb-2" id="vulnAssetId">
+                {% for a in assets %}<option value="{{ a.id }}">{{ a.name }}</option>{% endfor %}
+            </select>
+            <input class="form-control mb-2" id="vulnTitle" placeholder="Title">
+            <select class="form-select mb-2" id="vulnSeverity"><option>critical</option><option>high</option><option selected>medium</option><option>low</option></select>
+            <textarea class="form-control mb-2" id="vulnDesc" placeholder="Description"></textarea>
+            <input class="form-control" id="vulnCve" placeholder="CVE (optional)">
+        </div>
+        <div class="modal-footer"><button class="btn btn-primary" onclick="addVuln()">Save</button></div>
+    </div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function addVuln() {
+    const data = {
+        asset_id: parseInt(document.getElementById('vulnAssetId').value),
+        title: document.getElementById('vulnTitle').value,
+        severity: document.getElementById('vulnSeverity').value,
+        description: document.getElementById('vulnDesc').value,
+        cve: document.getElementById('vulnCve').value
+    };
+    await fetch('/api/vulnerabilities', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+    location.reload();
+}
+async function deleteVuln(id) {
+    if(confirm("Delete?")){
+        await fetch('/api/vulnerabilities/'+id, {method:'DELETE'});
+        location.reload();
+    }
+}
+</script>
+{% endblock %}
